@@ -14,6 +14,7 @@ class AddAchievementScreen extends StatefulWidget {
 
 class _AddAchievementScreenState extends State<AddAchievementScreen> {
   final _formKey = GlobalKey<FormState>();
+  String? _selectedClass;
   String? _selectedStudentId;
   String? _selectedCategory;
   String? _selectedLevel;
@@ -22,6 +23,15 @@ class _AddAchievementScreenState extends State<AddAchievementScreen> {
   final _verifiedByController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = Provider.of<AppProvider>(context, listen: false);
+      _verifiedByController.text = provider.userName;
+    });
+  }
 
   @override
   void dispose() {
@@ -35,6 +45,10 @@ class _AddAchievementScreenState extends State<AddAchievementScreen> {
   Widget build(BuildContext context) {
     final provider = Provider.of<AppProvider>(context);
     final isDark = provider.isDarkMode;
+    final classes = provider.students.map((s) => s.className).toSet().toList()..sort();
+    final filteredStudents = _selectedClass == null 
+        ? provider.students 
+        : provider.students.where((s) => s.className == _selectedClass).toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -99,21 +113,48 @@ class _AddAchievementScreenState extends State<AddAchievementScreen> {
               ),
               const SizedBox(height: 24),
 
+              // Class Selection
+              _buildLabel('Pilih Kelas (Opsional)', isDark),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                value: _selectedClass,
+                decoration: const InputDecoration(
+                  hintText: 'Semua Kelas',
+                  prefixIcon: Icon(Icons.class_outlined),
+                ),
+                isExpanded: true,
+                items: [
+                  const DropdownMenuItem(value: null, child: Text('Semua Kelas')),
+                  ...classes.map((c) => DropdownMenuItem(value: c, child: Text(c))),
+                ],
+                onChanged: (val) {
+                  setState(() {
+                    _selectedClass = val;
+                    _selectedStudentId = null;
+                  });
+                },
+              ),
+              const SizedBox(height: 20),
+
               // Student Selection
               _buildLabel('Pilih Siswa', isDark),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
                 value: _selectedStudentId,
-                decoration: const InputDecoration(
-                  hintText: 'Pilih siswa...',
-                  prefixIcon: Icon(Icons.person_outline_rounded),
+                decoration: InputDecoration(
+                  hintText: filteredStudents.isEmpty ? 'Data siswa belum tersedia' : 'Pilih siswa...',
+                  prefixIcon: const Icon(Icons.person_outline_rounded),
+                  enabled: filteredStudents.isNotEmpty,
                 ),
-                items: provider.students.map((s) {
-                  return DropdownMenuItem(
-                    value: s.id,
-                    child: Text('${s.name} (${s.className})', style: const TextStyle(fontSize: 14)),
-                  );
-                }).toList(),
+                isExpanded: true,
+                items: filteredStudents.isEmpty 
+                  ? null 
+                  : filteredStudents.map((s) {
+                      return DropdownMenuItem(
+                        value: s.id,
+                        child: Text('${s.name} (${s.className})', style: const TextStyle(fontSize: 14)),
+                      );
+                    }).toList(),
                 onChanged: (val) => setState(() => _selectedStudentId = val),
                 validator: (val) => val == null ? 'Pilih siswa' : null,
               ),

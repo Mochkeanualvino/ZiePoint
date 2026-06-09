@@ -130,6 +130,7 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
                   hintText: 'Pilih kelas...',
                   prefixIcon: Icon(Icons.class_outlined),
                 ),
+                isExpanded: true,
                 items: AppConstants.classes.map((c) {
                   return DropdownMenuItem(value: c, child: Text(c, style: const TextStyle(fontSize: 14)));
                 }).toList(),
@@ -144,9 +145,12 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: GestureDetector(
-                      onTap: () => setState(() => _selectedGender = 'L'),
-                      child: AnimatedContainer(
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () => setState(() => _selectedGender = 'L'),
+                        borderRadius: BorderRadius.circular(14),
+                        child: AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         decoration: BoxDecoration(
@@ -181,14 +185,18 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
                             ),
                           ],
                         ),
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: GestureDetector(
-                      onTap: () => setState(() => _selectedGender = 'P'),
-                      child: AnimatedContainer(
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () => setState(() => _selectedGender = 'P'),
+                        borderRadius: BorderRadius.circular(14),
+                        child: AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         decoration: BoxDecoration(
@@ -222,6 +230,7 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
                               ),
                             ),
                           ],
+                        ),
                         ),
                       ),
                     ),

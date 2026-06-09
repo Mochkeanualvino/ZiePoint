@@ -12,7 +12,7 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
+  final _nipController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
@@ -37,7 +37,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
   @override
   void dispose() {
     _nameController.dispose();
-    _emailController.dispose();
+    _nipController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     _animController.dispose();
@@ -55,7 +55,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     try {
       final result = await ApiService.register(
         _nameController.text.trim(),
-        _emailController.text.trim(),
+        _nipController.text.trim(),
         _passwordController.text,
         _confirmPasswordController.text,
       );
@@ -92,10 +92,10 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF4F46E5),
-              Color(0xFF6366F1),
-              Color(0xFF8B5CF6),
-              Color(0xFFA78BFA),
+              Color(0xFF1A237E),
+              Color(0xFF2B3990),
+              Color(0xFF3F51B5),
+              Color(0xFF7986CB),
             ],
           ),
         ),
@@ -133,6 +133,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                       const SizedBox(height: 20),
                       // Back button
                       GestureDetector(
+                        behavior: HitTestBehavior.opaque,
                         onTap: () => Navigator.pop(context),
                         child: Container(
                           width: 42, height: 42,
@@ -156,7 +157,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                       const SizedBox(height: 6),
                       Center(
                         child: Text(
-                          'Daftar untuk mulai menggunakan EduTrack+',
+                          'Daftar untuk mulai menggunakan i\'amPoint',
                           style: TextStyle(fontSize: 13, color: Colors.white.withOpacity(0.8)),
                         ),
                       ),
@@ -214,17 +215,16 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                               ),
                               const SizedBox(height: 16),
 
-                              // Email
-                              _buildLabel('Email'),
+                              // NIP
+                              _buildLabel('NIP (Nomor Induk Pegawai)'),
                               const SizedBox(height: 8),
                               _buildField(
-                                controller: _emailController,
-                                hint: 'contoh@email.com',
-                                icon: Icons.email_outlined,
-                                keyboardType: TextInputType.emailAddress,
+                                controller: _nipController,
+                                hint: 'Masukkan NIP Anda',
+                                icon: Icons.badge_outlined,
+                                keyboardType: TextInputType.number,
                                 validator: (val) {
-                                  if (val == null || val.isEmpty) return 'Masukkan email';
-                                  if (!val.contains('@')) return 'Email tidak valid';
+                                  if (val == null || val.isEmpty) return 'Masukkan NIP';
                                   return null;
                                 },
                               ),
@@ -321,6 +321,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
 
                       Center(
                         child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
                           onTap: () => Navigator.pop(context),
                           child: RichText(
                             text: TextSpan(

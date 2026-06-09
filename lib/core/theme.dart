@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
-  // Primary Palette
-  static const Color primary = Color(0xFF6366F1);
-  static const Color primaryLight = Color(0xFF818CF8);
-  static const Color primaryDark = Color(0xFF4F46E5);
+  // Primary Palette (Al-Ma'moen Blue)
+  static const Color primary = Color(0xFF2B3990);
+  static const Color primaryLight = Color(0xFF3F51B5);
+  static const Color primaryDark = Color(0xFF1A237E);
 
-  // Achievement (Green)
-  static const Color achievement = Color(0xFF10B981);
-  static const Color achievementLight = Color(0xFF34D399);
-  static const Color achievementDark = Color(0xFF059669);
+  // Achievement (Al-Ma'moen Yellow)
+  static const Color achievement = Color(0xFFFBC02D);
+  static const Color achievementLight = Color(0xFFFFF176);
+  static const Color achievementDark = Color(0xFFF57F17);
 
   // Violation (Red)
   static const Color violation = Color(0xFFEF4444);
@@ -37,13 +37,13 @@ class AppColors {
 
   // Gradients
   static const LinearGradient primaryGradient = LinearGradient(
-    colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+    colors: [Color(0xFF3F51B5), Color(0xFF1A237E)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient achievementGradient = LinearGradient(
-    colors: [Color(0xFF10B981), Color(0xFF06B6D4)],
+    colors: [Color(0xFFFFF176), Color(0xFFF57F17)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );

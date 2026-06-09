@@ -22,7 +22,7 @@ class AppProvider extends ChangeNotifier {
   Map<String, dynamic> _dashboardData = {};
 
   AppProvider() {
-    _loadData();
+    Future.microtask(() => _loadData());
   }
 
   // Getters
@@ -66,9 +66,29 @@ class AppProvider extends ChangeNotifier {
   }
 
   // Stats
-  int get totalStudents => _dashboardData['total_students'] ?? _students.length;
-  int get totalViolations => _dashboardData['total_violations'] ?? _violations.length;
-  int get totalAchievements => _dashboardData['total_achievements'] ?? _achievements.length;
+  int get totalStudents {
+    try {
+      return (_dashboardData['total_students'] ?? _students.length).toInt();
+    } catch (_) {
+      return _students.length;
+    }
+  }
+  
+  int get totalViolations {
+    try {
+      return (_dashboardData['total_violations'] ?? _violations.length).toInt();
+    } catch (_) {
+      return _violations.length;
+    }
+  }
+  
+  int get totalAchievements {
+    try {
+      return (_dashboardData['total_achievements'] ?? _achievements.length).toInt();
+    } catch (_) {
+      return _achievements.length;
+    }
+  }
   
   int get totalViolationPoints {
     if (isStudent) return currentStudent?.totalViolationPoints ?? 0;
@@ -83,11 +103,25 @@ class AppProvider extends ChangeNotifier {
   // Recent activities (combined and sorted by date)
   List<Map<String, dynamic>> get recentActivities {
     if (_dashboardData.containsKey('recent_activities') && isAdmin) {
-      return List<Map<String, dynamic>>.from(_dashboardData['recent_activities'].map((a) {
-        final Map<String, dynamic> item = Map<String, dynamic>.from(a as Map);
-        item['date'] = DateTime.parse(item['date'].toString());
-        return item;
-      }));
+      final rawActivities = _dashboardData['recent_activities'];
+      if (rawActivities is List) {
+        try {
+          return List<Map<String, dynamic>>.from(rawActivities.map((a) {
+            if (a is Map) {
+              final Map<String, dynamic> item = Map<String, dynamic>.from(a);
+              try {
+                item['date'] = DateTime.parse(item['date'].toString());
+              } catch (_) {
+                item['date'] = DateTime.now();
+              }
+              return item;
+            }
+            return <String, dynamic>{};
+          }).where((item) => item.isNotEmpty));
+        } catch (e) {
+          debugPrint('Error parsing recent activities: $e');
+        }
+      }
     }
     
     final List<Map<String, dynamic>> activities = [];
@@ -103,6 +137,7 @@ class AppProvider extends ChangeNotifier {
         'points': v.points,
         'date': v.date,
         'severity': v.severity,
+        'description': v.description,
       });
     }
     for (var a in _achievements) {
@@ -115,6 +150,7 @@ class AppProvider extends ChangeNotifier {
         'points': a.points,
         'date': a.date,
         'level': a.level,
+        'description': a.description,
       });
     }
     activities.sort((a, b) => (b['date'] as DateTime).compareTo(a['date'] as DateTime));
@@ -134,10 +170,14 @@ class AppProvider extends ChangeNotifier {
   // Weekly violation data for chart
   List<double> get weeklyViolationData {
     if (_dashboardData.containsKey('weekly_violations')) {
-      return List<double>.from(_dashboardData['weekly_violations'].map((v) => v.toDouble()));
+      final data = _dashboardData['weekly_violations'];
+      if (data is List) {
+        return data.map((v) => (v as num).toDouble()).toList();
+      }
     }
+    
     final now = DateTime.now();
-    final List<double> data = List.filled(7, 0);
+    final List<double> data = List.filled(7, 0.0);
     for (var v in _violations) {
       final diff = now.difference(v.date).inDays;
       if (diff < 7 && diff >= 0) {
@@ -150,10 +190,14 @@ class AppProvider extends ChangeNotifier {
   // Weekly achievement data for chart
   List<double> get weeklyAchievementData {
     if (_dashboardData.containsKey('weekly_achievements')) {
-      return List<double>.from(_dashboardData['weekly_achievements'].map((a) => a.toDouble()));
+      final data = _dashboardData['weekly_achievements'];
+      if (data is List) {
+        return data.map((a) => (a as num).toDouble()).toList();
+      }
     }
+
     final now = DateTime.now();
-    final List<double> data = List.filled(7, 0);
+    final List<double> data = List.filled(7, 0.0);
     for (var a in _achievements) {
       final diff = now.difference(a.date).inDays;
       if (diff < 7 && diff >= 0) {
@@ -178,15 +222,20 @@ class AppProvider extends ChangeNotifier {
   // Class stats
   Map<String, Map<String, int>> get classStats {
     if (_dashboardData.containsKey('class_stats')) {
-      final Map<String, Map<String, int>> stats = {};
-      for (var s in _dashboardData['class_stats']) {
-        stats[s['class_name']] = {
-          'students': s['student_count'] ?? 0,
-          'violations': (s['total_violations'] ?? 0).toInt(),
-          'achievements': (s['total_achievements'] ?? 0).toInt(),
-        };
+      try {
+        final Map<String, Map<String, int>> stats = {};
+        for (var s in _dashboardData['class_stats']) {
+          final className = (s['class_name'] ?? 'N/A').toString();
+          stats[className] = {
+            'students': (s['student_count'] ?? 0).toInt(),
+            'violations': (s['total_violations'] ?? 0).toInt(),
+            'achievements': (s['total_achievements'] ?? 0).toInt(),
+          };
+        }
+        if (stats.isNotEmpty) return stats;
+      } catch (e) {
+        debugPrint('Error parsing class_stats: $e');
       }
-      return stats;
     }
     final Map<String, Map<String, int>> stats = {};
     for (var s in _students) {
@@ -218,12 +267,15 @@ class AppProvider extends ChangeNotifier {
         _loadFromDummy();
       }
     } catch (e) {
-      // Fallback to dummy data if API fails
-      _loadFromDummy();
+      debugPrint('Error loading data: $e');
+      // Fallback to dummy data if API fails completely
+      if (_students.isEmpty) {
+        _loadFromDummy();
+      }
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
-
-    _isLoading = false;
-    notifyListeners();
   }
 
   Future<void> _loadFromApi() async {

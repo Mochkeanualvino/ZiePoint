@@ -40,7 +40,7 @@ class EduTrackApp extends StatelessWidget {
       child: Consumer<AppProvider>(
         builder: (context, provider, _) {
           return MaterialApp(
-            title: 'EduTrack+',
+            title: 'i\'amPoint',
             debugShowCheckedModeBanner: false,
             theme: AppTheme.lightTheme(),
             darkTheme: AppTheme.darkTheme(),
@@ -184,14 +184,17 @@ class HomeScreen extends StatelessWidget {
         ? AppColors.primary
         : isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
 
-    return GestureDetector(
-      onTap: () {
-        if (index == 4) {
-          _showSettingsSheet(context, provider);
-        } else {
-          provider.setCurrentIndex(screenIndex);
-        }
-      },
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          if (index == 4) {
+            _showSettingsSheet(context, provider);
+          } else {
+            provider.setCurrentIndex(screenIndex);
+          }
+        },
+        borderRadius: BorderRadius.circular(12),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -215,7 +218,7 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 
   void _showAddOptions(BuildContext context) {
@@ -312,10 +315,13 @@ class HomeScreen extends StatelessWidget {
     required LinearGradient gradient,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 24),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 24),
         decoration: BoxDecoration(
           gradient: gradient,
           borderRadius: BorderRadius.circular(16),
@@ -342,7 +348,7 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 
   void _showSettingsSheet(BuildContext context, AppProvider provider) {
@@ -442,7 +448,7 @@ class HomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'EduTrack+ v1.0.0',
+                  'i\'amPoint v1.0.0',
                   style: TextStyle(
                     fontSize: 12,
                     color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
@@ -465,6 +471,7 @@ class HomeScreen extends StatelessWidget {
     VoidCallback? onTap,
   }) {
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),

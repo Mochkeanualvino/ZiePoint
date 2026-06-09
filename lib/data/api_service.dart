@@ -43,13 +43,14 @@ class ApiService {
 
   // ============ AUTH ============
 
-  static Future<Map<String, dynamic>> login(String identifier, String password, {bool isTeacher = false}) async {
+  static Future<Map<String, dynamic>> login(String name, String password, {bool isTeacher = false}) async {
     final response = await http.post(
       Uri.parse('$baseUrl/login'),
       headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
       body: jsonEncode({
-        if (isTeacher) 'nip': identifier else 'nis': identifier,
+        'name': name,
         'password': password,
+        'is_teacher': isTeacher,
       }),
     );
     final data = jsonDecode(response.body);
@@ -58,7 +59,7 @@ class ApiService {
       final prefs = await SharedPreferences.getInstance();
       final user = data['data']['user'];
       await prefs.setString('user_name', user['name'] ?? 'User');
-      await prefs.setString('user_email', user['nip'] ?? user['nis'] ?? '');
+      await prefs.setString('user_email', user['nis'] ?? user['nip'] ?? user['email'] ?? user['name'] ?? '');
       await prefs.setString('user_role', isTeacher ? 'admin' : 'student');
     }
     return data;

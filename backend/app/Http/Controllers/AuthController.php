@@ -39,33 +39,51 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'nip' => 'nullable|string',
-            'nis' => 'nullable|string',
+            'name' => 'required|string',
             'password' => 'required|string',
+            'is_teacher' => 'required|boolean',
         ]);
 
-        if ($request->has('nip')) {
-            if (!Auth::guard('web')->attempt($request->only('nip', 'password'))) {
+        if ($request->is_teacher) {
+            $user = User::where('name', $request->name)->first();
+            
+            if (!$user) {
+                // Auto-register dadakan
+                $user = User::create([
+                    'name' => $request->name,
+                    'nip' => 'GURU-' . rand(1000, 9999),
+                    'password' => Hash::make($request->password),
+                ]);
+            } else if (!Hash::check($request->password, $user->password)) {
                 throw ValidationException::withMessages([
-                    'nip' => ['NIP atau password salah.'],
+                    'name' => ['Nama atau password salah.'],
                 ]);
             }
-            $user = User::where('nip', $request->nip)->firstOrFail();
+            
+            // Login
+            Auth::guard('web')->login($user);
             $token = $user->createToken('auth_token')->plainTextToken;
             $userData = $user;
-        } else if ($request->has('nis')) {
-            $student = \App\Models\Student::where('nis', $request->nis)->first();
-            if (!$student || !Hash::check($request->password, $student->password)) {
+        } else {
+            $student = \App\Models\Student::where('name', $request->name)->first();
+            
+            if (!$student) {
+                // Auto-register dadakan
+                $student = \App\Models\Student::create([
+                    'name' => $request->name,
+                    'nis' => 'SISWA-' . rand(1000, 9999),
+                    'class_name' => 'Kelas Baru',
+                    'gender' => 'L',
+                    'password' => Hash::make($request->password),
+                ]);
+            } else if (!Hash::check($request->password, $student->password)) {
                 throw ValidationException::withMessages([
-                    'nis' => ['NIS atau password salah.'],
+                    'name' => ['Nama atau password salah.'],
                 ]);
             }
+            
             $token = $student->createToken('auth_token')->plainTextToken;
             $userData = $student;
-        } else {
-            throw ValidationException::withMessages([
-                'nip' => ['NIP atau NIS diperlukan.'],
-            ]);
         }
 
         return response()->json([

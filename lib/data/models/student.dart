@@ -60,10 +60,11 @@ class Student {
   }
 
   String get initials {
-    final parts = name.split(' ');
-    if (parts.length >= 2) {
+    if (name.isEmpty) return '??';
+    final parts = name.trim().split(' ');
+    if (parts.length >= 2 && parts[0].isNotEmpty && parts[1].isNotEmpty) {
       return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
     }
-    return name.substring(0, 2).toUpperCase();
+    return name.length >= 2 ? name.substring(0, 2).toUpperCase() : name.toUpperCase();
   }
 }

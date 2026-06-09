@@ -67,7 +67,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   }
 
   Future<void> _checkAuthAndNavigate() async {
-    await Future.delayed(const Duration(milliseconds: 3000));
+    await Future.delayed(const Duration(milliseconds: 4000));
 
     if (!mounted) return;
 
@@ -101,10 +101,10 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF4F46E5),
-              Color(0xFF6366F1),
-              Color(0xFF8B5CF6),
-              Color(0xFFA78BFA),
+              Color(0xFF1A237E),
+              Color(0xFF2B3990),
+              Color(0xFF3F51B5),
+              Color(0xFF7986CB),
             ],
           ),
         ),
@@ -174,11 +174,19 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                 ),
                               ],
                             ),
-                            child: const Center(
-                              child: Icon(
-                                Icons.school_rounded,
-                                size: 60,
-                                color: AppColors.primary,
+                            child: Center(
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(20),
+                                child: Image.asset(
+                                  'assets/images/logo.png',
+                                  width: 80,
+                                  height: 80,
+                                  errorBuilder: (context, error, stackTrace) => const Icon(
+                                    Icons.location_on_rounded,
+                                    size: 60,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
@@ -195,7 +203,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                       child: Column(
                         children: [
                           const Text(
-                            'EduTrack+',
+                            'i\'amPoint',
                             style: TextStyle(
                               fontSize: 36,
                               fontWeight: FontWeight.w800,

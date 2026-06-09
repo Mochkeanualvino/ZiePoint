@@ -47,4 +47,14 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Get the identifier that will be used for authentication.
+     *
+     * @return string
+     */
+    public function username()
+    {
+        return 'name';
+    }
 }

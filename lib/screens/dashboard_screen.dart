@@ -44,8 +44,19 @@ class _StudentDashboard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Halo, ${provider.userName} 👋',
-                            style: Theme.of(context).textTheme.headlineMedium),
+                        Row(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Image.asset('assets/images/logo.png', width: 32, height: 32, errorBuilder: (c,e,s) => const Icon(Icons.location_on_rounded, color: AppColors.primary)),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text('Halo, ${provider.userName} 👋',
+                                  style: Theme.of(context).textTheme.headlineMedium, overflow: TextOverflow.ellipsis),
+                            ),
+                          ],
+                        ),
                         const SizedBox(height: 4),
                         Text(DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(DateTime.now()),
                             style: Theme.of(context).textTheme.bodyMedium),
@@ -338,7 +349,16 @@ class _TeacherDashboard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text('Dashboard Guru', style: Theme.of(context).textTheme.headlineMedium),
+                      Row(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Image.asset('assets/images/logo.png', width: 32, height: 32, errorBuilder: (c,e,s) => const Icon(Icons.location_on_rounded, color: AppColors.primary)),
+                          ),
+                          const SizedBox(width: 12),
+                          Text('Dashboard Guru', style: Theme.of(context).textTheme.headlineMedium),
+                        ],
+                      ),
                       const SizedBox(height: 4),
                       Text(DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(DateTime.now()), style: Theme.of(context).textTheme.bodyMedium),
                     ]),
@@ -357,6 +377,7 @@ class _TeacherDashboard extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
                 child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
                   onTap: () => Navigator.pushNamed(context, '/scan-qr'),
                   child: Container(
                     padding: const EdgeInsets.all(20),
@@ -480,9 +501,12 @@ class _TeacherDashboard extends StatelessWidget {
   }
 
   Widget _quickAction(BuildContext context, IconData icon, String label, Color color, bool isDark, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(color: isDark ? AppColors.cardDark : AppColors.card, borderRadius: BorderRadius.circular(16),
             border: Border.all(color: isDark ? AppColors.borderDark : AppColors.border)),
@@ -494,7 +518,7 @@ class _TeacherDashboard extends StatelessWidget {
               color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary, height: 1.3)),
         ]),
       ),
-    );
+    ));
   }
 
   Widget _legendDot(Color color, String label) {
@@ -535,6 +559,7 @@ class _TeacherDashboard extends StatelessWidget {
 
 Widget _iconBtn(BuildContext context, bool isDark, {required IconData icon, required VoidCallback onTap, int? badge}) {
   return GestureDetector(
+    behavior: HitTestBehavior.opaque,
     onTap: onTap,
     child: Stack(children: [
       Container(width: 44, height: 44, decoration: BoxDecoration(
@@ -556,6 +581,7 @@ Widget _activityTile(BuildContext context, Map<String, dynamic> activity, bool i
   final title = activity['title'] ?? 'Tidak diketahui';
   final subtitle = activity['subtitle'] ?? '';
   final className = activity['className'] ?? '';
+  final description = activity['description'] ?? '';
 
   return Container(
     margin: const EdgeInsets.only(bottom: 10),
@@ -584,6 +610,13 @@ Widget _activityTile(BuildContext context, Map<String, dynamic> activity, bool i
                   fontSize: 12, height: 1.4,
                   color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
                 )),
+              if (description.isNotEmpty) ...[
+                const SizedBox(height: 4),
+                Text('"$description"', style: TextStyle(
+                  fontSize: 12, fontStyle: FontStyle.italic,
+                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                )),
+              ],
               const SizedBox(height: 6),
               Text(timeAgo, style: TextStyle(
                 fontSize: 11, fontStyle: FontStyle.italic,

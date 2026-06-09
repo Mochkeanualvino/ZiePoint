@@ -101,6 +101,7 @@ class StudentListScreen extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTap: () => provider.setClassFilter(label),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
@@ -137,6 +138,7 @@ class StudentListScreen extends StatelessWidget {
     final gradeColor = _getGradeColor(grade);
 
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: () => Navigator.pushNamed(context, '/student-detail', arguments: student),
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),

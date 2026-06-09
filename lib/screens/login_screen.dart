@@ -56,6 +56,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     super.dispose();
   }
 
+  // --- FUNGSI LOGIN ASLI (TERHUBUNG KE DATABASE) ---
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -65,6 +66,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     });
 
     try {
+      // Menembak API Backend Laravel
       final result = await ApiService.login(
         _identifierController.text.trim(),
         _passwordController.text,
@@ -74,14 +76,16 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       if (!mounted) return;
 
       if (result['success'] == true) {
-        // Reload provider data with new role
+        // Mengambil data kredensial/role dari database
         final provider = Provider.of<AppProvider>(context, listen: false);
         await provider.refreshData();
+        
         if (!mounted) return;
+        // Pindah ke dashboard yang sesuai dengan rolenya
         Navigator.pushReplacementNamed(context, '/home');
       } else {
         setState(() {
-          _errorMessage = result['message'] ?? 'Login gagal. Periksa email dan password.';
+          _errorMessage = result['message'] ?? 'Login gagal. Periksa NIS/NIP dan password.';
         });
       }
     } catch (e) {
@@ -111,10 +115,10 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF4F46E5),
-              Color(0xFF6366F1),
-              Color(0xFF8B5CF6),
-              Color(0xFFA78BFA),
+              Color(0xFF1A237E),
+              Color(0xFF2B3990),
+              Color(0xFF3F51B5),
+              Color(0xFF7986CB),
             ],
           ),
         ),
@@ -181,15 +185,23 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                 ),
                               ],
                             ),
-                            child: const Center(
-                              child: Icon(Icons.school_rounded, size: 48, color: AppColors.primary),
+                            child: Center(
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(16),
+                                child: Image.asset(
+                                  'assets/images/logo.png',
+                                  width: 60,
+                                  height: 60,
+                                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.location_on_rounded, size: 48, color: AppColors.primary),
+                                ),
+                              ),
                             ),
                           ),
                         ),
                         const SizedBox(height: 28),
                         const Center(
                           child: Text(
-                            'EduTrack+',
+                            "i'amPoint",
                             style: TextStyle(
                               fontSize: 32, fontWeight: FontWeight.w800,
                               color: Colors.white, letterSpacing: 1,
@@ -243,9 +255,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                   ),
                                 ),
                                 const SizedBox(height: 6),
-                                const Text(
-                                  'Silahkan masuk untuk melanjutkan',
-                                  style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                                Text(
+                                  _isTeacherLogin 
+                                      ? 'Masuk dengan NIP dan Password Anda'
+                                      : 'Masuk dengan NIS dan Password Anda',
+                                  style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
                                 ),
                                 const SizedBox(height: 24),
 
@@ -275,12 +289,12 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                   const SizedBox(height: 16),
                                 ],
 
-                                // NISN / NIP
-                                _buildLabel(_isTeacherLogin ? 'NIP (Nomor Induk Pegawai)' : 'NIS (Nomor Induk Siswa)'),
+                                // Input NIS / NIP
+                                _buildLabel(_isTeacherLogin ? 'NIP' : 'NIS'),
                                 const SizedBox(height: 8),
                                 TextFormField(
                                   controller: _identifierController,
-                                  keyboardType: TextInputType.number,
+                                  keyboardType: TextInputType.text,
                                   style: const TextStyle(fontSize: 14),
                                   decoration: InputDecoration(
                                     hintText: _isTeacherLogin ? 'Masukkan NIP Anda' : 'Masukkan NIS Anda',
@@ -380,58 +394,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                             ),
                           ),
                         ),
-                        const SizedBox(height: 24),
-
-                        // Register link
-                        Center(
-                          child: GestureDetector(
-                            onTap: () => Navigator.pushNamed(context, '/register'),
-                            child: RichText(
-                              text: TextSpan(
-                                text: 'Belum punya akun? ',
-                                style: TextStyle(fontSize: 13, color: Colors.white.withOpacity(0.8)),
-                                children: const [
-                                  TextSpan(
-                                    text: 'Daftar disini',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white,
-                                      decoration: TextDecoration.underline,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-
-                        // Demo credentials
-                        Center(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Column(
-                              children: [
-                                Text(
-                                  'Demo Siswa: NIS 2024001',
-                                  style: TextStyle(fontSize: 11, color: Colors.white.withOpacity(0.9)),
-                                ),
-                                Text(
-                                  'Demo Guru: NIP 198001012005011003',
-                                  style: TextStyle(fontSize: 11, color: Colors.white.withOpacity(0.9)),
-                                ),
-                                Text(
-                                  'Password: password123',
-                                  style: TextStyle(fontSize: 11, color: Colors.white.withOpacity(0.9)),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
                         const SizedBox(height: 40),
                       ],
                     ),
@@ -457,6 +419,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
 
   Widget _buildRoleTab(String title, bool isSelected, VoidCallback onTap) {
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),

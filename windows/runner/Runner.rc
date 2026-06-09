@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.edutrack" "\0"
-            VALUE "FileDescription", "edutrack_plus" "\0"
+            VALUE "FileDescription", "AMPoint" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "edutrack_plus" "\0"
+            VALUE "InternalName", "AMPoint" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.edutrack. All rights reserved." "\0"
             VALUE "OriginalFilename", "edutrack_plus.exe" "\0"
-            VALUE "ProductName", "edutrack_plus" "\0"
+            VALUE "ProductName", "AMPoint" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
