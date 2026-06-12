@@ -1,5 +1,5 @@
 class AppConstants {
-  static const String appName = 'i\'amPoint';
+  static const String appName = 'AMPoint';
   static const String appTagline = 'Pantau Pelanggaran & Prestasi Siswa';
 
   // Violation Categories

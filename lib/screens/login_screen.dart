@@ -105,6 +105,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         statusBarIconBrightness: Brightness.light,
       ),
     );
+    final isDark = Provider.of<AppProvider>(context).isDarkMode;
 
     return Scaffold(
       body: Container(
@@ -201,7 +202,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                         const SizedBox(height: 28),
                         const Center(
                           child: Text(
-                            "i'amPoint",
+                            "AMPoint",
                             style: TextStyle(
                               fontSize: 32, fontWeight: FontWeight.w800,
                               color: Colors.white, letterSpacing: 1,
@@ -232,7 +233,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                         Container(
                           padding: const EdgeInsets.all(24),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: isDark ? AppColors.cardDark : Colors.white,
                             borderRadius: BorderRadius.circular(24),
                             boxShadow: [
                               BoxShadow(
@@ -247,7 +248,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
+                                Text(
                                   'Login',
                                   style: TextStyle(
                                     fontSize: 22, fontWeight: FontWeight.w700,
@@ -299,7 +300,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                   decoration: InputDecoration(
                                     hintText: _isTeacherLogin ? 'Masukkan NIP Anda' : 'Masukkan NIS Anda',
                                     prefixIcon: const Icon(Icons.person_outline_rounded, size: 20),
-                                    fillColor: AppColors.surface,
+                                    fillColor: isDark ? AppColors.surfaceDark : AppColors.surface,
                                     filled: true,
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(14),
@@ -340,7 +341,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                       ),
                                       onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                                     ),
-                                    fillColor: AppColors.surface,
+                                    fillColor: isDark ? AppColors.surfaceDark : AppColors.surface,
                                     filled: true,
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(14),

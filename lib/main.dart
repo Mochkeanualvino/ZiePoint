@@ -40,7 +40,7 @@ class EduTrackApp extends StatelessWidget {
       child: Consumer<AppProvider>(
         builder: (context, provider, _) {
           return MaterialApp(
-            title: 'i\'amPoint',
+            title: 'AMPoint',
             debugShowCheckedModeBanner: false,
             theme: AppTheme.lightTheme(),
             darkTheme: AppTheme.darkTheme(),
@@ -448,7 +448,7 @@ class HomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'i\'amPoint v1.0.0',
+                  'AMPoint v1.0.0',
                   style: TextStyle(
                     fontSize: 12,
                     color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,

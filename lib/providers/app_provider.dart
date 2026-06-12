@@ -59,7 +59,10 @@ class AppProvider extends ChangeNotifier {
   Student? get currentStudent {
     if (!isStudent) return null;
     try {
-      return _students.firstWhere((s) => s.nis == _userEmail);
+      final s = _students.firstWhere((s) => s.nis == _userEmail);
+      s.totalViolationPoints = _violations.where((v) => v.studentId == s.id).fold(0, (sum, v) => sum + v.points);
+      s.totalAchievementPoints = _achievements.where((a) => a.studentId == s.id).fold(0, (sum, a) => sum + a.points);
+      return s;
     } catch (_) {
       return null;
     }

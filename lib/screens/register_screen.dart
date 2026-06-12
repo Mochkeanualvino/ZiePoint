@@ -157,7 +157,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                       const SizedBox(height: 6),
                       Center(
                         child: Text(
-                          'Daftar untuk mulai menggunakan i\'amPoint',
+                          'Daftar untuk mulai menggunakan AMPoint',
                           style: TextStyle(fontSize: 13, color: Colors.white.withOpacity(0.8)),
                         ),
                       ),

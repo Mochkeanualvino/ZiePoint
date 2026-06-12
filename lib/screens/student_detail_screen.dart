@@ -135,7 +135,17 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> with SingleTi
                     onConfirm: () async {
                       try {
                         await provider.deleteStudent(student.id);
-                        if (context.mounted) Navigator.pop(context);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Text('Siswa berhasil dihapus'),
+                              backgroundColor: AppColors.primary,
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
+                          );
+                          Navigator.pop(context);
+                        }
                       } catch (e) {
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -448,7 +458,17 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> with SingleTi
                 onConfirm: () async {
                   try {
                     await provider.deleteViolation(v.id);
-                    if (context.mounted) setState(() {});
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Text('Pelanggaran berhasil dihapus'),
+                          backgroundColor: AppColors.primary,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                      );
+                      setState(() {});
+                    }
                   } catch (e) {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -586,7 +606,17 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> with SingleTi
                 onConfirm: () async {
                   try {
                     await provider.deleteAchievement(a.id);
-                    if (context.mounted) setState(() {});
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Text('Prestasi berhasil dihapus'),
+                          backgroundColor: AppColors.primary,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                      );
+                      setState(() {});
+                    }
                   } catch (e) {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(

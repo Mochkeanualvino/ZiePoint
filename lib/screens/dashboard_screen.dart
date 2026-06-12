@@ -52,7 +52,7 @@ class _StudentDashboard extends StatelessWidget {
                             ),
                             const SizedBox(width: 12),
                             Expanded(
-                              child: Text('Halo, ${provider.userName} 👋',
+                              child: Text('Dashboard Siswa',
                                   style: Theme.of(context).textTheme.headlineMedium, overflow: TextOverflow.ellipsis),
                             ),
                           ],
@@ -63,9 +63,16 @@ class _StudentDashboard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  _iconBtn(context, isDark,
-                      icon: isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
-                      onTap: () => provider.toggleTheme()),
+                  Row(children: [
+                    _iconBtn(context, isDark,
+                        icon: isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+                        onTap: () => provider.toggleTheme()),
+                    const SizedBox(width: 8),
+                    _iconBtn(context, isDark,
+                        icon: Icons.notifications_none_rounded,
+                        onTap: () => _showNotificationsSheet(context, provider, isDark),
+                        badge: provider.recentActivities.isNotEmpty ? provider.recentActivities.length : null),
+                  ]),
                 ],
               ),
               const SizedBox(height: 20),
@@ -365,7 +372,9 @@ class _TeacherDashboard extends StatelessWidget {
                     Row(children: [
                       _iconBtn(context, isDark, icon: isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded, onTap: () => provider.toggleTheme()),
                       const SizedBox(width: 8),
-                      _iconBtn(context, isDark, icon: Icons.notifications_none_rounded, onTap: () {}, badge: 3),
+                      _iconBtn(context, isDark, icon: Icons.notifications_none_rounded,
+                          onTap: () => _showNotificationsSheet(context, provider, isDark),
+                          badge: provider.recentActivities.isNotEmpty ? provider.recentActivities.length.clamp(0, 9) : null),
                     ]),
                   ],
                 ),
@@ -376,28 +385,31 @@ class _TeacherDashboard extends StatelessWidget {
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () => Navigator.pushNamed(context, '/scan-qr'),
-                  child: Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      gradient: AppColors.primaryGradient,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [BoxShadow(color: AppColors.primary.withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 8))],
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(20),
+                    onTap: () => Navigator.pushNamed(context, '/scan-qr'),
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        gradient: AppColors.primaryGradient,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [BoxShadow(color: AppColors.primary.withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 8))],
+                      ),
+                      child: Row(children: [
+                        Container(padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(16)),
+                            child: const Icon(Icons.qr_code_scanner_rounded, color: Colors.white, size: 32)),
+                        const SizedBox(width: 16),
+                        const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Text('Scan QR Siswa', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
+                          SizedBox(height: 4),
+                          Text('Input poin pelanggaran atau prestasi siswa', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                        ])),
+                        const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white70, size: 18),
+                      ]),
                     ),
-                    child: Row(children: [
-                      Container(padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(16)),
-                          child: const Icon(Icons.qr_code_scanner_rounded, color: Colors.white, size: 32)),
-                      const SizedBox(width: 16),
-                      const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text('Scan QR Siswa', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
-                        SizedBox(height: 4),
-                        Text('Input poin pelanggaran atau prestasi siswa', style: TextStyle(color: Colors.white70, fontSize: 12)),
-                      ])),
-                      const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white70, size: 18),
-                    ]),
                   ),
                 ),
               ),
@@ -642,5 +654,361 @@ Widget _activityTile(BuildContext context, Map<String, dynamic> activity, bool i
         ),
       ],
     ),
+  );
+}
+
+// ===================== NOTIFICATION BOTTOM SHEET =====================
+
+void _showNotificationsSheet(BuildContext context, AppProvider provider, bool isDark) {
+  final activities = provider.recentActivities;
+  final isStudent = provider.isStudent;
+
+  // For teachers: add warning notifications for students with low scores
+  final List<Map<String, dynamic>> notifications = [];
+
+  if (!isStudent) {
+    // Warning: students with behavior score below 60
+    for (var s in provider.students) {
+      if (s.behaviorScore < 60) {
+        notifications.add({
+          'type': 'warning',
+          'title': 'Peringatan Skor Rendah',
+          'subtitle': '${s.name} (${s.className})',
+          'description': 'Skor perilaku: ${s.behaviorScore}. Perlu perhatian khusus.',
+          'points': s.behaviorScore,
+          'date': DateTime.now(),
+        });
+      }
+    }
+  }
+
+  // Add recent activities as notifications
+  notifications.addAll(activities);
+
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (ctx) {
+      return DraggableScrollableSheet(
+        initialChildSize: 0.65,
+        maxChildSize: 0.9,
+        minChildSize: 0.3,
+        builder: (_, scrollController) {
+          return Container(
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.backgroundDark : Colors.white,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            child: Column(
+              children: [
+                // Handle bar
+                Container(
+                  margin: const EdgeInsets.only(top: 12),
+                  width: 40, height: 4,
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.borderDark : AppColors.border,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                // Title
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(Icons.notifications_rounded, color: AppColors.primary, size: 22),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Notifikasi',
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700,
+                                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary)),
+                            Text(
+                              isStudent
+                                  ? 'Riwayat pelanggaran & prestasi kamu'
+                                  : 'Aktivitas terbaru & peringatan siswa',
+                              style: TextStyle(fontSize: 12,
+                                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text('${notifications.length}',
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                      ),
+                    ],
+                  ),
+                ),
+                Divider(color: isDark ? AppColors.borderDark : AppColors.border, height: 1),
+                // List
+                Expanded(
+                  child: notifications.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.notifications_off_outlined, size: 56,
+                                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary),
+                              const SizedBox(height: 12),
+                              Text('Belum ada notifikasi',
+                                style: TextStyle(fontSize: 14,
+                                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary)),
+                            ],
+                          ),
+                        )
+                      : ListView.builder(
+                          controller: scrollController,
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+                          itemCount: notifications.length,
+                          itemBuilder: (context, index) {
+                            final notif = notifications[index];
+                            return _buildNotifItem(context, notif, isDark, isStudent);
+                          },
+                        ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    },
+  );
+}
+
+Widget _buildNotifItem(BuildContext context, Map<String, dynamic> notif, bool isDark, bool isStudent) {
+  final type = notif['type'] ?? 'unknown';
+  final isViolation = type == 'violation';
+  final isWarning = type == 'warning';
+  final isAchievement = type == 'achievement';
+
+  Color color;
+  IconData icon;
+  String label;
+
+  if (isViolation) {
+    color = AppColors.violation;
+    icon = Icons.warning_amber_rounded;
+    label = 'Pelanggaran';
+  } else if (isAchievement) {
+    color = AppColors.achievement;
+    icon = Icons.emoji_events_rounded;
+    label = 'Prestasi';
+  } else if (isWarning) {
+    color = Colors.orange;
+    icon = Icons.report_problem_rounded;
+    label = 'Peringatan';
+  } else {
+    color = AppColors.primary;
+    icon = Icons.info_outline_rounded;
+    label = 'Info';
+  }
+
+  final title = notif['title'] ?? '';
+  final subtitle = notif['subtitle'] ?? '';
+  final description = notif['description'] ?? '';
+  final points = notif['points'];
+  final date = notif['date'] as DateTime?;
+
+  String timeAgo = '';
+  if (date != null) {
+    final diff = DateTime.now().difference(date);
+    timeAgo = diff.inDays > 0 ? '${diff.inDays} hari lalu'
+        : diff.inHours > 0 ? '${diff.inHours} jam lalu'
+        : diff.inMinutes > 0 ? '${diff.inMinutes} menit lalu'
+        : 'Baru saja';
+  }
+
+  return GestureDetector(
+    onTap: () => _showNotifDetail(context, notif, isDark, color, icon, label),
+    child: Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.cardDark : Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: color.withOpacity(0.3)),
+        boxShadow: isDark ? [] : [
+          BoxShadow(color: color.withOpacity(0.08), blurRadius: 8, offset: const Offset(0, 2)),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44, height: 44,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: color, size: 22),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(color: color.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
+                      child: Text(label, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: color)),
+                    ),
+                    const Spacer(),
+                    if (timeAgo.isNotEmpty)
+                      Text(timeAgo, style: TextStyle(fontSize: 10, color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary)),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(title, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600,
+                    color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary)),
+                if (subtitle.isNotEmpty)
+                  Text(subtitle, style: TextStyle(fontSize: 11,
+                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary)),
+              ],
+            ),
+          ),
+          if (points != null && !isWarning) ...[
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(20)),
+              child: Text(
+                '${isViolation ? '-' : '+'}$points',
+                style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w800),
+              ),
+            ),
+          ],
+          const SizedBox(width: 4),
+          Icon(Icons.chevron_right_rounded, size: 18,
+            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary),
+        ],
+      ),
+    ),
+  );
+}
+
+void _showNotifDetail(BuildContext context, Map<String, dynamic> notif, bool isDark, Color color, IconData icon, String label) {
+  final title = notif['title'] ?? '';
+  final subtitle = notif['subtitle'] ?? '';
+  final description = notif['description'] ?? '';
+  final points = notif['points'];
+  final severity = notif['severity'] ?? '';
+  final className = notif['className'] ?? '';
+  final date = notif['date'] as DateTime?;
+
+  showDialog(
+    context: context,
+    builder: (ctx) {
+      return AlertDialog(
+        backgroundColor: isDark ? AppColors.cardDark : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        contentPadding: const EdgeInsets.all(24),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Icon
+            Container(
+              width: 64, height: 64,
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: color, size: 32),
+            ),
+            const SizedBox(height: 16),
+            // Label badge
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(color: color.withOpacity(0.12), borderRadius: BorderRadius.circular(20)),
+              child: Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: color)),
+            ),
+            const SizedBox(height: 14),
+            // Title
+            Text(title, textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700,
+                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary)),
+            const SizedBox(height: 8),
+            // Subtitle & class
+            if (subtitle.isNotEmpty || className.isNotEmpty)
+              Text(
+                [subtitle, className].where((s) => s.isNotEmpty).join(' • '),
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 13, color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary),
+              ),
+            // Points
+            if (points != null) ...[
+              const SizedBox(height: 14),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(30)),
+                child: Text(
+                  notif['type'] == 'warning' ? 'Skor: $points' : '${notif['type'] == 'violation' ? '-' : '+'}$points poin',
+                  style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w800),
+                ),
+              ),
+            ],
+            // Severity
+            if (severity.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Text('Tingkat: $severity', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600,
+                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary)),
+            ],
+            // Description
+            if (description.isNotEmpty) ...[
+              const SizedBox(height: 14),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: isDark ? AppColors.surfaceDark : AppColors.surface,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(description, textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 13, height: 1.5,
+                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary)),
+              ),
+            ],
+            // Date
+            if (date != null) ...[
+              const SizedBox(height: 10),
+              Text(
+                '${date.day}/${date.month}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}',
+                style: TextStyle(fontSize: 11, color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => Navigator.pop(ctx),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: color,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+              child: const Text('Tutup', style: TextStyle(fontWeight: FontWeight.w600)),
+            ),
+          ),
+        ],
+      );
+    },
   );
 }

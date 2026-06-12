@@ -48,7 +48,7 @@ class ApiService {
       Uri.parse('$baseUrl/login'),
       headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
       body: jsonEncode({
-        'name': name,
+        'identifier': name,
         'password': password,
         'is_teacher': isTeacher,
       }),
@@ -82,7 +82,7 @@ class ApiService {
       final prefs = await SharedPreferences.getInstance();
       final user = data['data']['user'];
       await prefs.setString('user_name', user['name'] ?? 'User');
-      await prefs.setString('user_email', user['nip'] ?? '');
+      await prefs.setString('user_email', user['nis'] ?? user['nip'] ?? '');
     }
     return data;
   }
@@ -120,9 +120,14 @@ class ApiService {
     if (search != null && search.isNotEmpty) params['search'] = search;
 
     final uri = Uri.parse('$baseUrl/students').replace(queryParameters: params.isNotEmpty ? params : null);
-    final response = await http.get(uri, headers: await _headers());
-    final data = jsonDecode(response.body);
-    return data['data'] ?? [];
+    try {
+      final response = await http.get(uri, headers: await _headers());
+      final data = jsonDecode(response.body);
+      return data['data'] ?? [];
+    } catch (e) {
+      print('Error fetching students: $e');
+      return [];
+    }
   }
 
   static Future<Map<String, dynamic>> createStudent(Map<String, dynamic> studentData) async {
@@ -135,6 +140,8 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> updateStudent(int id, Map<String, dynamic> studentData) async {
+    // Karena API Express di instruksi tidak punya endpoint PUT, kita fallback ke Laravel / abaikan.
+    // (Atau bisa update ke Express jika endpoint ada)
     final response = await http.put(
       Uri.parse('$baseUrl/students/$id'),
       headers: await _headers(),

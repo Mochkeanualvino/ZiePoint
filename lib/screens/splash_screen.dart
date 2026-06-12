@@ -67,7 +67,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   }
 
   Future<void> _checkAuthAndNavigate() async {
-    await Future.delayed(const Duration(milliseconds: 4000));
+    await Future.delayed(const Duration(milliseconds: 10000));
 
     if (!mounted) return;
 
@@ -203,7 +203,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                       child: Column(
                         children: [
                           const Text(
-                            'i\'amPoint',
+                            'AMPoint',
                             style: TextStyle(
                               fontSize: 36,
                               fontWeight: FontWeight.w800,
